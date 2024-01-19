@@ -45,7 +45,7 @@ def upload_file_to_s3(file_path, bucket_name, random_date_prefix):
 def main():
     rows_per_file = 1000
     files = 10000
-    bucket_name = "<<you-bucket-name>>"
+    bucket_name = "<<your-bucket-name>>"
     print(f"Generating {files} files with {rows_per_file} lines each")
     generate_test_data(rows_per_file, files, bucket_name)
     print("Test data generated successfully")

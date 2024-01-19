@@ -1,5 +1,4 @@
 from aws_cdk import (
-    Aspects,
     Duration,
     Stack,
     Size,
@@ -9,17 +8,16 @@ from aws_cdk import (
     aws_events_targets as targets,
     aws_iam as iam,
     aws_stepfunctions as stepfunctions,
+    aws_logs as logs
 )
 from constructs import Construct
 import json
-import cdk_nag
 
 class CompactionStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        Aspects.of(self).add(cdk_nag.AwsSolutionsChecks())
         #Get context variables
         source_s3_bucket_uri = self.node.try_get_context("source_s3_uri")
         target_s3_bucket_uri = self.node.try_get_context("target_s3_uri")
@@ -205,12 +203,19 @@ class CompactionStack(Stack):
             }
         }
 
+        stateMachineLogGroup = logs.LogGroup(self, "CompactionStateMachineLogGroup")
+
         compactionStateMachine = stepfunctions.StateMachine(self, "CompactionStateMachine",
             definition_body = stepfunctions.DefinitionBody.from_string(json.dumps(STATE_MACHINE_TEMPLATE)),
             definition_substitutions={
                 "LIST_LAMBDA": sfListPrefixFunction.function_arn,
                 "COMPACT_LAMBDA": sfCompactFunction.function_arn
-            }
+            },
+            logs=stepfunctions.LogOptions(
+                destination=stateMachineLogGroup,
+                level=stepfunctions.LogLevel.ALL
+            ),
+            tracing_enabled=True
         )
 
         compactionStateMachine.add_to_role_policy(iam.PolicyStatement(

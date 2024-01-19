@@ -52,7 +52,7 @@ def handler(event, context):
     print(event)
 
     s_bucket, s_key = split_s3_parts(event['s3_source_uri'])
-    d_bucket, d_key = split_s3_parts((event['s3_destination_uri'])
+    d_bucket, d_key = split_s3_parts(event['s3_destination_uri'])
 
     dates = get_dates_in_range(event['duration'], event['date_format'])
 

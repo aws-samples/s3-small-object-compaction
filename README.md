@@ -47,7 +47,7 @@ cdk deploy -c source_s3_uri=s3://my-source-bucket/prefix/ -c target_s3_uri=s3://
 
 # Testing
 
-By default there is an EventBridge scheduled rule to invoke the Step Function State Machine every `previous_days` specified at deployment. This rule is `DISABLED` by default.
+By default there is an EventBridge scheduled rule to invoke the Step Function State Machine every `previous_days` specified at deployment. This rule is `DISABLED` by default. To enable this, update the `lambdaTriggerRule` in `compaction_stack.py` to `enabled=True` and redeploy the CDK application.
 
 The standalone Lambda function `S3ObjectCompactionStack-standaloneCompactFunction` can be invoked using the following test event:
 ```
@@ -59,7 +59,7 @@ The standalone Lambda function `S3ObjectCompactionStack-standaloneCompactFunctio
 }
 ```
 
-*This will take several minutes to run as each S3 prefix is being processed in sequence.*
+*Depending on the volume of data, this may take several minutes to run as each S3 prefix is being processed in sequence.*
 
 The Step Function State Machine `CompactionStateMachine` can be invoked manually with the following inputs:
 ```
