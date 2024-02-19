@@ -6,11 +6,22 @@ from datetime import timedelta, datetime
 s3 = boto3.client('s3')
 
 def list_objects_in_s3(bucket, prefix):
-    response = s3.list_objects_v2(Bucket=bucket, Prefix=prefix)
-    if response.get('Contents'):
-        return response['Contents']
-    else:
-        return 'None'
+    contents = []
+    continuation_token = None
+
+    while True:
+        if continuation_token:
+            response = s3.list_objects_v2(Bucket=bucket, Prefix=prefix, ContinuationToken=continuation_token)
+        else:
+            response = s3.list_objects_v2(Bucket=bucket, Prefix=prefix)
+        contents.extend(response.get('Contents', []))
+    
+        if 'NextContinuationToken' not in response:
+            break
+      
+        continuation_token = response['NextContinuationToken']
+
+    return contents if contents else 'None'
 
 def get_object_from_s3(bucket, key):
     response = s3.get_object(Bucket=bucket, Key=key)
