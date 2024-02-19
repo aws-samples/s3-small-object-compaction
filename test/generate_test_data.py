@@ -1,7 +1,9 @@
+#!/usr/bin/env python3
 
 import random
 import boto3
 import os
+import argparse
 
 s3 = boto3.client('s3')
 
@@ -35,7 +37,7 @@ def generate_test_data(rows_per_file, files, bucket_name):
 
 def get_prefix():
     month = random.choice(["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"])
-    day = random.choice(["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"])
+    day = random.choice(["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28"])
     random_date_prefix = "2023/" + month + "/" + day + "/"
     return random_date_prefix
 
@@ -43,11 +45,14 @@ def upload_file_to_s3(file_path, bucket_name, random_date_prefix):
     s3.upload_file(file_path, bucket_name, random_date_prefix + file_path)
 
 def main():
-    rows_per_file = 1000
-    files = 10000
-    bucket_name = "<<your-bucket-name>>"
-    print(f"Generating {files} files with {rows_per_file} lines each")
-    generate_test_data(rows_per_file, files, bucket_name)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-r", "--rows_per_file", type=int) 
+    parser.add_argument("-f", "--files", type=int) 
+    parser.add_argument("-b", "--bucket_name") 
+    args = parser.parse_args()
+
+    print(f"Generating {args.files} files with {args.rows_per_file} lines each")
+    generate_test_data(args.rows_per_file, args.files, args.bucket_name)
     print("Test data generated successfully")
 
 if __name__ == "__main__":

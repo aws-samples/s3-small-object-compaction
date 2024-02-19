@@ -75,10 +75,11 @@ The Step Function State Machine `CompactionStateMachine` can be invoked manually
 
 
 # Generating test data
+
 There is a useful test utility that can be used to generate some random data and seed it across date partitions in a source S3 bucket:
 
 ```
-python generate_test_data.py
+./test/generate_test_data.py -r 1000 -f 10000 -b my-test-bucket
 ```
 
 # Cleaning Up
