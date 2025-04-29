@@ -2,8 +2,8 @@ import datetime
 import json
 import boto3
 from datetime import timedelta, datetime
-import os
 
+s3_client = boto3.client('s3')
 
 def get_dates_in_range(duration, date_format):
     start_date = datetime.now() - timedelta(days=duration)
@@ -46,7 +46,6 @@ def lambda_handler(event, context):
     bucket_name = destination_uri.replace("s3://", "").split("/")[0]
     
     # Write to S3
-    s3_client = boto3.client('s3')
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     s3_client.put_object(
         Body=jsonl_content,
