@@ -102,6 +102,7 @@ class CompactionStack(Stack):
                 source_s3_bucket.bucket_arn + "/*",
             ]))
         source_s3_bucket.grant_read(sfListPrefixFunction)
+        target_s3_bucket.grant_write(sfListPrefixFunction)
 
 
         sfCompactFunction = awslambda.Function(self, "distributedMapCompactFunction",
@@ -198,7 +199,16 @@ class CompactionStack(Stack):
                 "MaxConcurrency": 100,
                 "Label": "ForEachS3Prefix",
                 "End": True,
-                "ItemsPath": "$.s3_locations"
+                "ItemReader": {
+                    "Resource": "arn:aws:states:::s3:getObject",
+                    "ReaderConfig": {
+                    "InputType": "JSONL"
+                    },
+                    "Parameters": {
+                    "Bucket.$": "$.s3_locations_bucket",
+                    "Key.$": "$.s3_locations_key"
+                    }
+                }
                 }
             }
         }
@@ -228,6 +238,15 @@ class CompactionStack(Stack):
                 sfListPrefixFunction.function_arn,
                 sfCompactFunction.function_arn + ":*",
                 sfListPrefixFunction.function_arn + ":*",
+            ]))
+        
+        compactionStateMachine.add_to_role_policy(iam.PolicyStatement(
+            effect=iam.Effect.ALLOW,
+            actions=[
+                "s3:GetObject"
+            ],
+            resources=[
+                target_s3_bucket.bucket_arn + "/*"
             ]))
 
         #Required for distributed map. Circular dependency issue means currently cannot use add_to_role_policy().
